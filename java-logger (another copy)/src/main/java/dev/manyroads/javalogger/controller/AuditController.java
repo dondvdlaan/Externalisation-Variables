@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +27,6 @@ public class AuditController {
 
     @Autowired
     private AuditDbManager auditDbManager;
-
     // ---- Constants ----
     private static final Logger logger = LogManager.getLogger(AuditController.class);
 
@@ -38,7 +40,14 @@ public class AuditController {
 
         // Propagating Errors Up the Call Stack from DAOLogs
         try{
+            DateFormat simple = new SimpleDateFormat(
+                    "dd MMM yyyy HH:mm:ss:SSS Z");
+            System.out.println("Route: allLogs try: " + new SimpleDateFormat(
+                    "dd MMM yyyy HH:mm:ss:SSS Z").format(new Date()));
+            //System.out.println("Route: allLogs try: " + simple.format(new Date()));
+
             return ResponseEntity.ok(auditDbManager.getAllLogsFromDb());
+            //return ResponseEntity.ok(AuditDbManager.getInstance().getAllLogsFromDb());
         } catch (Exception e) {
             System.out.println("Route: allLogs catch");
             logger.error(e.getMessage());

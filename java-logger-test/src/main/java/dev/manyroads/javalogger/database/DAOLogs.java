@@ -3,6 +3,7 @@ package dev.manyroads.javalogger.database;
 import dev.manyroads.javalogger.model.Log;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -12,11 +13,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
  * Class serves as DAO (Data Access Object) for the logs in database support_audit
  */
+//@Component
 public class DAOLogs {
 
     // ---- Constants ----

@@ -2,32 +2,34 @@ package dev.manyroads.javalogger.database;
 
 import dev.manyroads.javalogger.JavaLoggerApplication;
 import dev.manyroads.javalogger.model.Log;
-import io.github.cdimascio.dotenv.Dotenv;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLNonTransientConnectionException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
  * Class to access Audit database
  */
 @Component
+@ConfigurationProperties(prefix = "audit")
 public class AuditDbManager {
+
+    // ---- Constants ----
 
     @Autowired
     private AuditDbConfig auditDbConfig;
-
-    // ---- Constants ----
     private static final Logger logger = LogManager.getLogger(AuditDbManager.class);
-    //private final String JDBC_DRIVER                 = "org.mariadb.jdbc.Driver";
-    private static final String JDBC_DRIVER                 = "org.mariadb.jdbc.Driver";
+    private  String jdbcDriver;
+    //private static final String JDBC_DRIVER                 = "org.mariadb.jdbc.Driver";
     private static final String DB_LOCAL_SERVER_IP_ADDRESS  = "localhost";
     private static final String DB_LOCAL_NAME               = "/support_audit";
     private static final String DB_LOCAL_CONNECTION_URL     =   "jdbc:mariadb://" +
@@ -35,27 +37,47 @@ public class AuditDbManager {
                                                                 DB_LOCAL_NAME;
     private static final String DB_LOCAL_USER_NAME          = "testUser";
     private static final String DB_LOCAL_USER_PW            = "testPW";
+    private String dbLocalUserPw;
 
     // ---- Attributes ----
-    private static AuditDbManager instance;
+    private AuditDbManager instance;
+    //private static AuditDbManager instance;
+    @Autowired
     private        DAOLogs daoLogs;
 
     // ---- Getters & Setters ----
-    public String getJDBC_DRIVER() {
-      return JDBC_DRIVER;
+
+    public String getJdbcDriver() {
+        return jdbcDriver;
     }
 
+    public void setJdbcDriver(String jdbcDriver) {
+        this.jdbcDriver = jdbcDriver;
+    }
+
+    public String getDbLocalUserPw() {
+        return dbLocalUserPw;
+    }
+
+    public void setDbLocalUserPw(String dbLocalUserPw) {
+        this.dbLocalUserPw = dbLocalUserPw;
+    }
+
+
     // ---- Constructors ----
+    /*
     private AuditDbManager() {
         this.daoLogs = new DAOLogs();
     }
+     */
     // ---- Methods ----
     /**
      * Method to return sole instance
      *
      * @return instance : AuditDbManager : Sole Instance
      */
-    public static synchronized AuditDbManager getInstance() {
+    public synchronized AuditDbManager getInstance() {
+    //public static synchronized AuditDbManager getInstance() {
 
         if (instance == null) instance = new AuditDbManager();
 
@@ -73,12 +95,16 @@ public class AuditDbManager {
 
         try {
             //1: Registeren des JDBC driver
-            Class.forName(auditDbConfig.getJdbcDriver());
-            //2. Offenen einer Verbindung
-            // Compose URL
-            String url = auditDbConfig.getDbLocalConnectionUrl() + auditDbConfig.getDbLocalServerIpAddress() + auditDbConfig.getDbLocalName();
+            //Class.forName(auditDbConfig.getJdbcDriver());
+            System.out.println("getRwDbConnection()try: " + new SimpleDateFormat(
+                    "dd MMM yyyy HH:mm:ss:SSS Z").format(new Date()));
 
-            rwDbConnection = DriverManager.getConnection(url, auditDbConfig.getDbLocalUserName(), auditDbConfig.getDbLocalUserPw());
+            Class.forName(this.getJdbcDriver());
+
+            System.out.println("this.dbLocalUserPw: " + this.dbLocalUserPw);
+
+            //2. Offenen einer Verbindung
+            rwDbConnection = DriverManager.getConnection(DB_LOCAL_CONNECTION_URL, DB_LOCAL_USER_NAME, DB_LOCAL_USER_PW);
             //rwDbConnection = DriverManager.getConnection(DB_LOCAL_CONNECTION_URL, DB_LOCAL_USER_NAME, DB_LOCAL_USER_PW);
 
         } catch (SQLNonTransientConnectionException sqlNoConnectionEx) {
@@ -121,10 +147,18 @@ public class AuditDbManager {
 
         //Neue Verbindung erstellen
         // Propagating Errors Up the Call Stack at AuditController
-       // try {
-            if (this.isDatabaseOnline()) {
-                allLogsFromDb = this.daoLogs.getAllDataRecordsFromDbTbl(this.getRwDbConnection());
-            }
+        try {
+           // if (this.isDatabaseOnline()) {
+
+                System.out.println("getAllLogsFromDb(): " + new SimpleDateFormat(
+                        "dd MMM yyyy HH:mm:ss:SSS Z").format(new Date()));
+
+                allLogsFromDb = daoLogs.getAllDataRecordsFromDbTbl(this.getRwDbConnection());
+                //allLogsFromDb = this.daoLogs.getAllDataRecordsFromDbTbl(this.getRwDbConnection());
+           // }
+        }
+            finally{}
+
       /*  } catch (Exception e) {
             logger.error(e.getMessage());
             System.err.println(e.getMessage());

@@ -1,29 +1,43 @@
 package dev.manyroads.javalogger;
 
 import dev.manyroads.javalogger.database.AuditDbConfig;
-import io.github.cdimascio.dotenv.Dotenv;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.Banner;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 @SpringBootApplication
+@EnableConfigurationProperties
 public class JavaLoggerApplication implements CommandLineRunner {
 
 	// ---- Constants ----
 	private static final Logger logger = LogManager.getLogger(JavaLoggerApplication.class);
-	Dotenv dotenv = Dotenv.load();
+	@Autowired
+	private AuditDbConfig auditDbConfig;
 
 	public static void main(String[] args) {
 		logger.info("Main started");
-		SpringApplication.run(JavaLoggerApplication.class, args);
+
+		// NStartuo banner turned off
+		//SpringApplication application = new SpringApplication(JavaLoggerApplication.class);
+		//application.setBannerMode(Banner.Mode.OFF);
+		//application.run(args);
+
+		new SpringApplicationBuilder()
+				.sources(JavaLoggerApplication.class)
+				.bannerMode(Banner.Mode.OFF)
+				.run(args);
+		//SpringApplication.run(JavaLoggerApplication.class, args);
 	}
 
 	/**
@@ -36,7 +50,7 @@ public class JavaLoggerApplication implements CommandLineRunner {
 	public void run(String... args) throws SQLException {
 
 		System.out.println("Main CommandLineRunner testing");
-		//System.out.println("jdbc: " + dotenv.get("jdbcDriver"));
+		System.out.println("PW: " + auditDbConfig.getDbLocalUserPw());
 
 
 	}
