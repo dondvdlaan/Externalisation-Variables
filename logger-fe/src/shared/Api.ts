@@ -3,7 +3,9 @@ import { Dispatch, SetStateAction, useEffect, useState }  from "react";
 import useErrorHandler from "../modules/errorHandling/ErrorHandler";
 
 // ********************* Constanten und Typen *********************
-export const baseUrl  = `http://localhost:8080/`;
+export const baseUrl  = process.env.REACT_APP_BACKEND_URL;
+//export const baseUrl  = `http://localhost:8080/`;
+
 
 
 type SetState<T> = Dispatch<SetStateAction<T>>;

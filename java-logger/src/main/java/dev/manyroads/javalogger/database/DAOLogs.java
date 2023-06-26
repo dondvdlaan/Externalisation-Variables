@@ -3,30 +3,27 @@ package dev.manyroads.javalogger.database;
 import dev.manyroads.javalogger.model.Log;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Class serves as DAO (Data Access Object) for the logs in database support_audit
  */
+@Service
 public class DAOLogs {
+
+    @Autowired
+    private AuditDbConfig auditDbConfig;
 
     // ---- Constants ----
     private static final Logger logger = LogManager.getLogger(DAOLogs.class);
-    protected static final String COL_NAME_LOG_ID = "logID";
-    protected static final String COL_NAME_APPLICATION = "application";
-    protected static final String COL_NAME_LOG_TIME = "logtime";
-    protected static final String COL_NAME_LEVEL_MSG = "levelmsg";
-    protected static final String COL_NAME_MESSAGE = "message";
-    private static final String TABLE_NAME = "logs";
 
     // ---- Methods ----
     // Read
@@ -39,19 +36,19 @@ public class DAOLogs {
      */
     public List<Log> getAllDataRecordsFromDbTbl(Connection dbRwConnection) throws Exception {
 
-        //Decl. and Init
+             //Decl. and Init
         List<Log> allLogsFromDbTable = new ArrayList<>();
 
         Statement dbStatementToExecute = null;
 
-        try {
+       //try {
             //1. Rw Db Connection ist bereits vom DbManger geoeffenent und Integriert
 
             //2. Geneieren des Statenements
             dbStatementToExecute = dbRwConnection.createStatement();
 
             //3. Query generieren und absetzen und Ergebnismenge merken
-            String strSqlStmtGetAll = "SELECT * FROM " + TABLE_NAME;
+            String strSqlStmtGetAll = "SELECT * FROM " + auditDbConfig.getTableName();
 
             ResultSet resultSetFromExecutedQuery = dbStatementToExecute.executeQuery(strSqlStmtGetAll);
 
@@ -64,13 +61,15 @@ public class DAOLogs {
                 //6. Modelobjekt zur passenden Liste addiern
                 allLogsFromDbTable.add(logFromDbTable);
             }
-       }
+      // }
         // Propagating Errors Up the Call Stack at AuditController
-        /*  catch (Exception e) {
+       /*   catch (Exception e) {
             logger.error(e);
             e.printStackTrace();
-        }*/ finally {
-            if (dbStatementToExecute != null) {
+        }
+         finally {
+
+        if (dbStatementToExecute != null) {
                 //5. Schliessen der des Statements
                 try {
                     dbStatementToExecute.close();
@@ -79,7 +78,7 @@ public class DAOLogs {
                     sqlEx.printStackTrace();
                 }
             }
-
+*/
             if (dbRwConnection != null) {
                 //6. Schliessen der Verbindung
                 try {
@@ -89,7 +88,7 @@ public class DAOLogs {
                     sqlEx.printStackTrace();
                 }
             }
-        }
+        //}
         return allLogsFromDbTable;
     }
     // ---- Submethods ----
@@ -102,7 +101,7 @@ public class DAOLogs {
      *
      * @throws Exception
      */
-    protected Log getModelFromResultSet(ResultSet currentResultSet) throws Exception {
+    private Log getModelFromResultSet(ResultSet currentResultSet) throws Exception {
         //Index auslesen
 //        final int iColumnIndexId          = currentResultSet.findColumn(COL_NAME_ID);
 //        final int iColumnIndexName        = currentResultSet.findColumn(COL_NAME_NAME);
@@ -111,11 +110,12 @@ public class DAOLogs {
 //        final int iColumnIndexIsUploaded  = currentResultSet.findColumn(COL_NAME_IS_UPLOADED);
 
         //6. Durch Auswahl des Datentyps und angabe des Spaltenindizes auselsen der Daten
-        int logID           = currentResultSet.getInt(COL_NAME_LOG_ID);
-        String application  = currentResultSet.getString(COL_NAME_APPLICATION);
-        String logTime      = currentResultSet.getString(COL_NAME_LOG_TIME);
-        String levelMsg     = currentResultSet.getString(COL_NAME_LEVEL_MSG);
-        String message      = currentResultSet.getString(COL_NAME_MESSAGE);
+
+        int logID           = currentResultSet.getInt(auditDbConfig.getColNameLogID());
+        String application  = currentResultSet.getString(auditDbConfig.getColNameApplication());
+        String logTime      = currentResultSet.getString(auditDbConfig.getColNameLogTime());
+        String levelMsg     = currentResultSet.getString(auditDbConfig.getColNameLevelMsg());
+        String message      = currentResultSet.getString(auditDbConfig.getColNameMessage());
 
         //7. Neues Modelobjekt generieren
         Log logFromDb = new Log();

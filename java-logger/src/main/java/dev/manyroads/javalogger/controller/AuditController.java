@@ -1,8 +1,6 @@
 package dev.manyroads.javalogger.controller;
 
-import dev.manyroads.javalogger.JavaLoggerApplication;
 import dev.manyroads.javalogger.database.AuditDbManager;
-import dev.manyroads.javalogger.model.Log;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -28,7 +25,6 @@ public class AuditController {
     // ---- Constants ----
     private static final Logger logger = LogManager.getLogger(AuditController.class);
 
-
     // ---- Routes ----
     // Retrieve all logs
     @GetMapping("/allLogs")
@@ -39,12 +35,14 @@ public class AuditController {
         // Propagating Errors Up the Call Stack from DAOLogs
         try{
             return ResponseEntity.ok(auditDbManager.getAllLogsFromDb());
-        } catch (Exception e) {
+
+        } catch (Exception e ) {
             System.out.println("Route: allLogs catch");
             logger.error(e.getMessage());
 
             Map<String, String> error = new HashMap<>();
             error.put("error", "An error occurred while retrieving logs: "+ e.getMessage());
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }

@@ -1,17 +1,13 @@
 package dev.manyroads.javalogger.database;
 
-import dev.manyroads.javalogger.JavaLoggerApplication;
 import dev.manyroads.javalogger.model.Log;
-import io.github.cdimascio.dotenv.Dotenv;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLNonTransientConnectionException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,32 +19,22 @@ public class AuditDbManager {
 
     @Autowired
     private AuditDbConfig auditDbConfig;
+    @Autowired
+    private DAOLogs daoLogs;
 
     // ---- Constants ----
     private static final Logger logger = LogManager.getLogger(AuditDbManager.class);
-    //private final String JDBC_DRIVER                 = "org.mariadb.jdbc.Driver";
-    private static final String JDBC_DRIVER                 = "org.mariadb.jdbc.Driver";
-    private static final String DB_LOCAL_SERVER_IP_ADDRESS  = "localhost";
-    private static final String DB_LOCAL_NAME               = "/support_audit";
-    private static final String DB_LOCAL_CONNECTION_URL     =   "jdbc:mariadb://" +
-                                                                DB_LOCAL_SERVER_IP_ADDRESS +
-                                                                DB_LOCAL_NAME;
-    private static final String DB_LOCAL_USER_NAME          = "testUser";
-    private static final String DB_LOCAL_USER_PW            = "testPW";
 
     // ---- Attributes ----
     private static AuditDbManager instance;
-    private        DAOLogs daoLogs;
+    //private        DAOLogs daoLogs;
 
     // ---- Getters & Setters ----
-    public String getJDBC_DRIVER() {
-      return JDBC_DRIVER;
-    }
 
     // ---- Constructors ----
-    private AuditDbManager() {
-        this.daoLogs = new DAOLogs();
-    }
+    //private AuditDbManager() {
+    //    this.daoLogs = new DAOLogs();
+    //}
     // ---- Methods ----
     /**
      * Method to return sole instance
@@ -71,23 +57,24 @@ public class AuditDbManager {
 
         Connection rwDbConnection = null;
 
-        try {
-            //1: Registeren des JDBC driver
-            Class.forName(auditDbConfig.getJdbcDriver());
-            //2. Offenen einer Verbindung
-            // Compose URL
-            String url = auditDbConfig.getDbLocalConnectionUrl() + auditDbConfig.getDbLocalServerIpAddress() + auditDbConfig.getDbLocalName();
+        // 1. Configure Datasource
+            String DB_LOCAL_CONNECTION_URL =    auditDbConfig.getDbLocalConnectionUrl() +
+                                                auditDbConfig.getDbLocalServerIpAddress() +
+                                                auditDbConfig.getDbLocalName();
 
-            rwDbConnection = DriverManager.getConnection(url, auditDbConfig.getDbLocalUserName(), auditDbConfig.getDbLocalUserPw());
-            //rwDbConnection = DriverManager.getConnection(DB_LOCAL_CONNECTION_URL, DB_LOCAL_USER_NAME, DB_LOCAL_USER_PW);
+            BasicDataSource dataSource = new BasicDataSource();
 
-        } catch (SQLNonTransientConnectionException sqlNoConnectionEx) {
-            logger.error(sqlNoConnectionEx);
-            throw new Exception("Keine Datenbankverbindung");
-        } catch (ClassNotFoundException classNotFoundEx) {
-            logger.error(classNotFoundEx);
-            throw new Exception("JDBC Treiber konnte nicht geladen werden");
-        }
+            dataSource.setUrl(DB_LOCAL_CONNECTION_URL);
+            dataSource.setUsername(auditDbConfig.getDbLocalUserName());
+            dataSource.setPassword(auditDbConfig.getDbLocalUserPw());
+
+        //2. Offenen einer Verbindung
+        rwDbConnection = dataSource.getConnection();
+
+        //catch (ClassNotFoundException classNotFoundEx) {
+        //    logger.error(classNotFoundEx);
+        //    throw new Exception("JDBC Treiber konnte nicht geladen werden");
+        //}
 
         return rwDbConnection;
     }
@@ -96,7 +83,7 @@ public class AuditDbManager {
      *
      * @return isOnline : boolean : true : Db ist Online : false nicht
      */
-    public boolean isDatabaseOnline() {
+    public boolean isDatabaseOnline() throws Exception {
 
         boolean isOnline = true;
 
@@ -106,6 +93,7 @@ public class AuditDbManager {
             logger.error(e);
             e.printStackTrace();
             isOnline = false;
+            throw e;
         }
         return isOnline;
     }
@@ -121,15 +109,19 @@ public class AuditDbManager {
 
         //Neue Verbindung erstellen
         // Propagating Errors Up the Call Stack at AuditController
-       // try {
+        try {
+            Connection connectionToDb = this.getRwDbConnection();
+
             if (this.isDatabaseOnline()) {
-                allLogsFromDb = this.daoLogs.getAllDataRecordsFromDbTbl(this.getRwDbConnection());
+                //allLogsFromDb = new DAOLogs().getAllDataRecordsFromDbTbl(connectionToDb);
+                allLogsFromDb = this.daoLogs.getAllDataRecordsFromDbTbl(connectionToDb);
             }
-      /*  } catch (Exception e) {
+        } catch (Exception e) {
             logger.error(e.getMessage());
             System.err.println(e.getMessage());
+            throw e;
         }
-*/
+
         return allLogsFromDb;
     }
 }

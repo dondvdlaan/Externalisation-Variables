@@ -6,13 +6,24 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "audit")
 public class AuditDbConfig {
+
+    // ---- Attributes ---
+    // Audit Database
     private String jdbcDriver;
     private String dbLocalServerIpAddress;
     private String dbLocalName;
     private String dbLocalConnectionUrl;
     private String dbLocalUserName;
     private String dbLocalUserPw;
+    // Audit Database Table
+    private String colNameLogID;
+    private String colNameApplication;
+    private String colNameLogTime;
+    private String colNameLevelMsg;
+    private String colNameMessage;
+    private String tableName;
 
+    // ---- Getters & Setters ----
     public String getJdbcDriver() {
         return jdbcDriver;
     }
@@ -59,5 +70,53 @@ public class AuditDbConfig {
 
     public void setDbLocalUserPw(String dbLocalUserPw) {
         this.dbLocalUserPw = dbLocalUserPw;
+    }
+
+    public String getColNameLogID() {
+        return colNameLogID;
+    }
+
+    public void setColNameLogID(String colNameLogID) {
+        this.colNameLogID = colNameLogID;
+    }
+
+    public String getColNameApplication() {
+        return colNameApplication;
+    }
+
+    public void setColNameApplication(String colNameApplication) {
+        this.colNameApplication = colNameApplication;
+    }
+
+    public String getColNameLogTime() {
+        return colNameLogTime;
+    }
+
+    public void setColNameLogTime(String colNameLogTime) {
+        this.colNameLogTime = colNameLogTime;
+    }
+
+    public String getColNameLevelMsg() {
+        return colNameLevelMsg;
+    }
+
+    public void setColNameLevelMsg(String colNameLevelMsg) {
+        this.colNameLevelMsg = colNameLevelMsg;
+    }
+
+    public String getColNameMessage() {
+        return colNameMessage;
+    }
+
+    public void setColNameMessage(String colNameMessage) {
+        this.colNameMessage = colNameMessage;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 }
