@@ -1,11 +1,12 @@
-Building block for loggers in Java, Node and REACT
+Example of Externalization of variables in Java, Node and REACT based on Building of loggers 
 
-This building block centralizes logs from the Java backend, Node backend 
-and REACT frontend. All logs are sent to a mysql database.
+Herewith an example of how to externalize variables from the source code in Java, Node and REACT
+to be used in development, stage and production environments.
+
 
 Summary
-- java-logger   : log4j2 dependency
-- node-logger   : winston and winston-transport dependencies
-- react-fe      : vanilla js logger
+- java-logger   : mvn spring-boot:run -P dev / stage /prod
+- node-logger   : npm run dev / stage / prod 
+- react-fe      : npm start / run stage / run prod
 - support_audit : mysql db with logs table
-- logger-fe     : REACT log viewer with MUI table
+- logger-fe     : npm start / run stage / run prod

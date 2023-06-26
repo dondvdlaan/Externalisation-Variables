@@ -5,6 +5,9 @@ const server        = express();
 const cors          = require("cors");
 const bodyParser    = require("body-parser");
 
+// Loads .env file chosen at "npm run dev/stage/prod" start-up command
+require('dotenv').config({ path: `.env.${process.env.NODE_ENV}` })
+
 // ---- Modules ----
 const logger    = require("./logger/logger");
 const auditPool = require("./utils/auditDB.js");
@@ -12,7 +15,7 @@ const feLogger  = require("./controllers/feLogger.js");
 
 
 // ---- Constants ----
-const serverPort = 5555;
+const serverPort = process.env.SERVER_PORT;
 
 // ---- Middleware ----
 // req.body is populated 
